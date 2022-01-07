@@ -49,7 +49,18 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
    :key="todo.id"
    class="card mt-2"> 
    <div class="card-body p-2">  
-     {{ todo.subject }}
+     <div class="form-check">
+       <input class="form-check-input" 
+              type="checkbox"
+              v-model="todo.completed" 
+              >
+      <label class="form-check-label"
+        :class="{ todo: todo.completed}"  
+      > <!--class 바인딩 : :class="{ todo: todo.completed}" 
+            style 바인딩 : :style="todo.completed ? todoStyle : {}-->
+           {{ todo.subject }}
+      </label>
+       </div>
    </div>
    </div>
 </div>
@@ -63,11 +74,11 @@ export default {
   setup() {
     const toggle = ref(false);
     const todo = ref('');
-    const todos = ref([
-      {id: 1, subject: '휴대폰 사기'},
-      {id: 2, subject: '장보기'},
-    ]); 
-
+    const todos = ref([]); 
+    const todoStyle = {
+      textDecoration: 'line-through',
+      color: 'gray'
+    };
     const hasError = ref(false);
  
     const onSubmit = () =>{
@@ -76,9 +87,11 @@ export default {
       } else{
           todos.value.push({  //ref이기 떄문에 value 필요
           id: Date.now(),   //id에 고유성을 최대한 주기 위해 
-          subject: todo.value
+          subject: todo.value,
+          completed: false,
         });
         hasError.value = false;
+        todo.value = ''; //추가가 되면 empty로 
     }
       };
     
@@ -92,14 +105,16 @@ export default {
       todos,
       toggle,
       onToggle,
-      hasError
+      hasError,
+      todoStyle
     };
   }
 }
 </script>
 
 <style>
-  .name {
-    color: red
+  .todo {
+    color: gray;
+    text-decoration: line-through;
   }
 </style>
