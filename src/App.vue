@@ -15,10 +15,14 @@ v-bind: == :
 v-on: == @
  -->
 <template>
-<div class="container"> <!--왼쪽 오른쪽을 띄워줌-->
- <h2>To-Do List </h2>   <!--template에선 .value를 해줄필요가 없다.-->
-  <form class ="d-flex">
-    <div class="flex-grow-1 mr-5">
+<div class="container"> <!--왼쪽 오른쪽 여백을 준다.-->
+ <h2>To-do List </h2>   <!--template에선 .value를 해줄필요가 없다.-->
+ <!--submit 버튼이 눌려졌을때 onSubmit 함수 호출 
+     prevent : refresh 되는 속성 제거 -->
+  <form                 
+  @submit.prevent="onSubmit"  
+  class ="d-flex">
+    <div class="flex-grow-1 mr-2">
       <input
         class="form-control"
         type="text"
@@ -28,61 +32,36 @@ v-on: == @
     </div>
     <div>
     <button class="btn btn-primary"
-     @click="onSubmit"
+    type="submit"
     >Add
     </button>
 </div>
    </form> 
+   {{ todos }}
 </div>
+
 </template>
 
 <script>
 //template에서는 값의 변경을 일반 변수로는 적용할 수 없다.
 import { ref } from 'vue';
-import { reactive } from 'vue';
 
 export default {
   setup() {
-    const name = 'Hyungjoo';
-    const type = ref('number');
-    const nameClass = ref('name')
-
-    const todo = ref('형주');
-    const reactName = reactive({
-      id : 1
-    });
-
-    const greeting = (name) =>{
-      return 'Hello' + name;
-    };
-
-    const greet = greeting(name);
-
-    const updateName = () => {
-      todo.value = "잘생긴 형주";
-      reactName.id = 2;
-      type.value = 'text';
-    };
+    const todo = ref('');
+    const todos = ref([]); 
  
     const onSubmit = () =>{
-        console.log(todo.value);
+        todos.value.push({  //ref이기 떄문에 value 필요
+          id: Date.now(),   //id에 고유성을 최대한 주기 위해 
+          subject: todo.value
+        }) 
     };
 
-    const updateInfo = (e)=>{ //정보값을 가져옴
-        todo.value = e.target.value;
-    };
-
-    return {
-      name,  //template 안에서 접근 가능하게 함
-      greeting,
-      greet,
-      updateName,
+    return {//template 안에서 접근 가능하게 함
       todo,
-      reactName,
-      type,
-      nameClass,
       onSubmit,
-      updateInfo
+      todos,
     };
   }
 }
@@ -90,6 +69,6 @@ export default {
 
 <style>
   .name {
-    color: blue
+    color: red
   }
 </style>
