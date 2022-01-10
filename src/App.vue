@@ -1,24 +1,9 @@
-<!--
-view component는 아래 3가지 부분으로 구성되어 있다.
-1.template
-html 코드가 들어간다.
-
-2.scrpit
-javascrpit 코드가 들어간다. 
-
-3.style
-css 코드가 들어간다.
--->
-
 <!-- 
 v-bind: == :
 v-on: == @
 v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비용이 많이 든다. 
  -->
 <template>
-<div v-show="toggle">true</div>
-<div v-show="!toggle">flase</div>
-<button @click="onToggle">Toggle</button>
 <div class="container"> <!--왼쪽 오른쪽 여백을 준다.-->
  <h2>To-do List </h2>   <!--template에선 .value를 해줄필요가 없다.-->
  <!--submit 버튼이 눌려졌을때 onSubmit 함수 호출 
@@ -43,13 +28,16 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
  
 <div v-show="hasError" style="color: red">This field cannot be empty</div>
    </form> 
+  <div v-if="!todos.length">
+    추가된 Todo가 없습니다.
+    </div>
    <!--key는 v-for을 사용할때 각각의 node를 추적하기 위해 사용한다.-->
    <div 
-   v-for="todo in todos"
+   v-for="(todo, index) in todos"
    :key="todo.id"
    class="card mt-2"> 
-   <div class="card-body p-2">  
-     <div class="form-check">
+   <div class="card-body p-2 d-flex align-items-center">  
+     <div class="form-check flex-grow-1">
        <input class="form-check-input" 
               type="checkbox"
               v-model="todo.completed" 
@@ -61,6 +49,11 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
            {{ todo.subject }}
       </label>
        </div>
+        <div>
+          <button class="btn btn-danger btn-sm"
+          @click="deleteTodo(index)"
+          >Delete</button>
+        </div>
    </div>
    </div>
 </div>
@@ -72,7 +65,10 @@ import { ref } from 'vue';
 
 export default {
   setup() {
-    const toggle = ref(false);
+    const deleteTodo = (index) => {
+       todos.value.splice(index, 1);
+    };
+
     const todo = ref('');
     const todos = ref([]); 
     const todoStyle = {
@@ -94,19 +90,14 @@ export default {
         todo.value = ''; //추가가 되면 empty로 
     }
       };
-    
-    const onToggle = () =>{
-      toggle.value = !toggle.value;
-    }
 
     return {//template 안에서 접근 가능하게 함
       todo,
       onSubmit,
       todos,
-      toggle,
-      onToggle,
       hasError,
-      todoStyle
+      todoStyle,
+      deleteTodo
     };
   }
 }
