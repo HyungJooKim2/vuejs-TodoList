@@ -45,8 +45,16 @@ export default {
   },
 
   setup() { 
-    const deleteTodoMain = (index) => {
-       todos.value.splice(index, 1);
+    const deleteTodoMain = async (index) => {
+       errorMessage.value = '';
+       const id = todos.value[index].id; 
+       try{
+       await axios.delete('http://localhost:3000/todos/'+ id);
+        todos.value.splice(index, 1);
+       }catch(err){
+         console.log(err);
+         errorMessage.value = 'Something went wrong'
+       }
     };
 
     const todos = ref([]); 
@@ -58,26 +66,45 @@ export default {
       color: 'gray'
     };
 
-    const addTodo = (todo) => {
+    const getTodos = async () => {
+      try{
+       const res = await axios.get('http://localhost:3000/todos');
+       todos.value = res.data;
+      }catch(err){
+        console.log(err);
+      }
+    };
+    getTodos();
+    const addTodo = async (todo) => {
       /*
       Todo 데이터베이스에 투두를 저장 id는 자동으로 추가됨
-      요청을 보냄 -> 요청이 끝나고 오기 전에 다음으로 넘어감 (비동기) then 키워드 활용
+      요청을 보냄 -> 요청이 끝나고 오기 전에 다음으로 넘어감 (비동기) 
       하여 요청이 끝났을때 (응답이 왔을때) 실행되게
       */
      errorMessage.value = '';
-      axios.post('http://localhost:3000/todos', {
+     try{
+     const res = await axios.post('http://localhost:3000/todos', {
         subject: todo.subject,
         completed: todo.completed,
-      }).then(res =>{
-        console.log(res); 
-        todos.value.push(res.data);
-      }).catch(err =>{
-        console.log(err);
-        errorMessage.value = 'Something went wrong.';
-      }); 
+      });
+      todos.value.push(res.data);
+     } catch (err) {
+       console.log(err);
+       errorMessage.value = 'Something went wrong.';
+     }
     };
 
-    const toggleTodoMain = (index) =>{
+    const toggleTodoMain = async (index) =>{
+      errorMessage.value = '';
+      const id = todos.value[index].id;
+      try{
+        await axios.patch('http://localhost:3000/todos/'+id,{
+          completed: !todos.value[index].completed
+        });
+      }catch (err){
+        console.log(err);
+        errorMessage.value = 'Something went wrong';
+      }
       todos.value[index].completed = !todos.value[index].completed
     };
     

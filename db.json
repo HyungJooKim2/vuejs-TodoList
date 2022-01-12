@@ -2,13 +2,8 @@
   "todos": [
     {
       "subject": "buy milk",
-      "completed": false,
+      "completed": true,
       "id": 1
-    },
-    {
-      "subject": "buy milk",
-      "completed": false,
-      "id": 2
     }
   ]
 }
