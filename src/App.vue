@@ -15,6 +15,7 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
 
       <hr />
  <TodoSimpleForm @add-todo="addTodo"/>
+ <div style="color: red">{{ errorMessage }}</div>
 
   <div v-if="!filteredTodos.length">
     There is nothing to display
@@ -36,6 +37,7 @@ computed는 함수안에 들어있는 reactive status가 있을때만 값을 가
 import { ref, computed } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
+import axios from 'axios';
 export default {
   components: {
     TodoSimpleForm,    //component 등록 
@@ -49,13 +51,30 @@ export default {
 
     const todos = ref([]); 
 
+    const errorMessage = ref('');
+
     const todoStyle = {
       textDecoration: 'line-through',
       color: 'gray'
     };
 
     const addTodo = (todo) => {
-      todos.value.push(todo);
+      /*
+      Todo 데이터베이스에 투두를 저장 id는 자동으로 추가됨
+      요청을 보냄 -> 요청이 끝나고 오기 전에 다음으로 넘어감 (비동기) then 키워드 활용
+      하여 요청이 끝났을때 (응답이 왔을때) 실행되게
+      */
+     errorMessage.value = '';
+      axios.post('http://localhost:3000/todos', {
+        subject: todo.subject,
+        completed: todo.completed,
+      }).then(res =>{
+        console.log(res); 
+        todos.value.push(res.data);
+      }).catch(err =>{
+        console.log(err);
+        errorMessage.value = 'Something went wrong.';
+      }); 
     };
 
     const toggleTodoMain = (index) =>{
@@ -83,6 +102,7 @@ export default {
       toggleTodoMain,
       searchText,
       filteredTodos,
+      errorMessage
     };
   }
 }
