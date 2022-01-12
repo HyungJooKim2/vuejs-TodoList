@@ -11,31 +11,10 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
   <div v-if="!todos.length">
     추가된 Todo가 없습니다.
     </div>
-   <!--key는 v-for을 사용할때 각각의 node를 추적하기 위해 사용한다.-->
-   <div 
-   v-for="(todo, index) in todos"
-   :key="todo.id"
-   class="card mt-2"> 
-   <div class="card-body p-2 d-flex align-items-center">  
-     <div class="form-check flex-grow-1">
-       <input class="form-check-input" 
-              type="checkbox"
-              v-model="todo.completed" 
-              >
-      <label class="form-check-label"
-        :class="{ todo: todo.completed}"  
-      > <!--class 바인딩 : :class="{ todo: todo.completed}" 
-            style 바인딩 : :style="todo.completed ? todoStyle : {}-->
-           {{ todo.subject }}
-      </label>
-       </div>
-        <div>
-          <button class="btn btn-danger btn-sm"
-          @click="deleteTodo(index)"
-          >Delete</button>
-        </div>
-   </div>
-   </div>
+    <TodoList :todos="todos"
+     @toggle-todo="toggleTodoMain" 
+     @delete-todo="deleteTodoMain"
+     /> <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
 </div>
 </template>
 
@@ -43,14 +22,15 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
 //template에서는 값의 변경을 일반 변수로는 적용할 수 없다.
 import { ref } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
-
+import TodoList from './components/TodoList.vue';
 export default {
   components: {
-    TodoSimpleForm    //component 등록 
+    TodoSimpleForm,    //component 등록 
+    TodoList,
   },
 
   setup() { 
-    const deleteTodo = (index) => {
+    const deleteTodoMain = (index) => {
        todos.value.splice(index, 1);
     };
 
@@ -65,12 +45,16 @@ export default {
       todos.value.push(todo);
     };
 
+    const toggleTodoMain = (index) =>{
+      todos.value[index].completed = !todos.value[index].completed
+    };
 
     return {//template 안에서 접근 가능하게 함
       addTodo,
       todos,
       todoStyle,
-      deleteTodo
+      deleteTodoMain,
+      toggleTodoMain,
     };
   }
 }
