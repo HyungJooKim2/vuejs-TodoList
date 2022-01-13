@@ -4,27 +4,63 @@ v-on: == @
 v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비용이 많이 든다. 
  -->
 <template>
-<div class="container"> <!--왼쪽 오른쪽 여백을 준다.-->
- <h2>To-do List </h2>   <!--template에선 .value를 해줄필요가 없다.-->
-      <input
-        class="form-control"
-        type="text"
-        v-model="searchText"
-        placeholder="Search"
-      >
+  <div class="container">
+    <!--왼쪽 오른쪽 여백을 준다.-->
+    <h2>To-do List</h2>
+    <!--template에선 .value를 해줄필요가 없다.-->
+    <input
+      class="form-control"
+      type="text"
+      v-model="searchText"
+      placeholder="Search"
+    />
 
-      <hr />
- <TodoSimpleForm @add-todo="addTodo"/>
- <div style="color: red">{{ errorMessage }}</div>
+    <hr />
+    <TodoSimpleForm @add-todo="addTodo" />
+    <div style="color: red">{{ errorMessage }}</div>
 
-  <div v-if="!filteredTodos.length">
-    There is nothing to display
-    </div>
-    <TodoList :todos="filteredTodos"
-     @toggle-todo="toggleTodoMain" 
-     @delete-todo="deleteTodoMain"
-     /> <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
-</div>
+    <div v-if="!filteredTodos.length">There is nothing to display</div>
+    <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
+    <TodoList
+      :todos="filteredTodos"
+      @toggle-todo="toggleTodoMain"
+      @delete-todo="deleteTodoMain"
+    />
+    <!--active : 파란색 표시-->
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li v-if="currentPage !== 1" class="page-item">
+          <a
+            style="cursor: pointer"
+            class="page-link"
+            @click="getTodos(currentPage - 1)"
+            >Previous</a
+          >
+        </li>
+        <li
+          v-for="page in numberOfPages"
+          :key="page"
+          class="page-item"
+          :class="currentPage === page ? 'active' : ''"
+        >
+          <a
+            style="cursor: pointer"
+            class="page-link"
+            @click="getTodos(page)"
+            >{{ page }}</a
+          >
+        </li>
+        <li v-if="numberOfPages !== currentPage" class="page-item">
+          <a
+            style="cursor: pointer"
+            class="page-link"
+            @click="getTodos(currentPage + 1)"
+            >Next</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
 </template>
 
 <script>
@@ -34,43 +70,51 @@ method는 인자로 값을 받아와서 함수 안에서 사용 가능
 computed는 함수안에 들어있는 reactive status가 있을때만 값을 가져와서 다룰 수 있으며 
 값을 저장함 (2번 출력해도 1번만 출력됨)
 */
-import { ref, computed } from 'vue';
-import TodoSimpleForm from './components/TodoSimpleForm.vue';
-import TodoList from './components/TodoList.vue';
-import axios from 'axios';
+import { ref, computed } from "vue";
+import TodoSimpleForm from "./components/TodoSimpleForm.vue";
+import TodoList from "./components/TodoList.vue";
+import axios from "axios";
 export default {
   components: {
-    TodoSimpleForm,    //component 등록 
+    TodoSimpleForm, //component 등록
     TodoList,
   },
 
-  setup() { 
+  setup() {
     const deleteTodoMain = async (index) => {
-       errorMessage.value = '';
-       const id = todos.value[index].id; 
-       try{
-       await axios.delete('http://localhost:3000/todos/'+ id);
+      errorMessage.value = "";
+
+      const id = todos.value[index].id;
+      try {
+        await axios.delete("http://localhost:3000/todos/" + id);
         todos.value.splice(index, 1);
-       }catch(err){
-         console.log(err);
-         errorMessage.value = 'Something went wrong'
-       }
+      } catch (err) {
+        console.log(err);
+        errorMessage.value = "Something went wrong";
+      }
     };
-
-    const todos = ref([]); 
-
-    const errorMessage = ref('');
-
+    const numberOfTodos = ref(0);
+    const numberOfPages = computed(() => {
+      return Math.ceil(numberOfTodos.value / limit);
+    });
+    const limit = 5;
+    const currentPage = ref(1);
+    const todos = ref([]);
+    const errorMessage = ref("");
     const todoStyle = {
-      textDecoration: 'line-through',
-      color: 'gray'
+      textDecoration: "line-through",
+      color: "gray",
     };
 
-    const getTodos = async () => {
-      try{
-       const res = await axios.get('http://localhost:3000/todos');
-       todos.value = res.data;
-      }catch(err){
+    const getTodos = async (page = currentPage.value) => {
+      currentPage.value = page;
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/todos?_page=${page}&_limit=${limit}`
+        );
+        numberOfTodos.value = res.headers["x-total-count"];
+        todos.value = res.data;
+      } catch (err) {
         console.log(err);
       }
     };
@@ -81,47 +125,47 @@ export default {
       요청을 보냄 -> 요청이 끝나고 오기 전에 다음으로 넘어감 (비동기) 
       하여 요청이 끝났을때 (응답이 왔을때) 실행되게
       */
-     errorMessage.value = '';
-     try{
-     const res = await axios.post('http://localhost:3000/todos', {
-        subject: todo.subject,
-        completed: todo.completed,
-      });
-      todos.value.push(res.data);
-     } catch (err) {
-       console.log(err);
-       errorMessage.value = 'Something went wrong.';
-     }
-    };
-
-    const toggleTodoMain = async (index) =>{
-      errorMessage.value = '';
-      const id = todos.value[index].id;
-      try{
-        await axios.patch('http://localhost:3000/todos/'+id,{
-          completed: !todos.value[index].completed
+      errorMessage.value = "";
+      try {
+        const res = await axios.post("http://localhost:3000/todos", {
+          subject: todo.subject,
+          completed: todo.completed,
         });
-      }catch (err){
+        todos.value.push(res.data);
+      } catch (err) {
         console.log(err);
-        errorMessage.value = 'Something went wrong';
+        errorMessage.value = "Something went wrong.";
       }
-      todos.value[index].completed = !todos.value[index].completed
     };
-    
-    const searchText = ref('');
 
-    const filteredTodos = computed(()=>{
-        if(searchText.value){
-            return todos.value.filter(todo =>{
-              //우리가 검색한 값이 포함이 되면 return
-              return todo.subject.includes(searchText.value);
-            });
-        }
-        return todos.value;
+    const toggleTodoMain = async (index) => {
+      errorMessage.value = "";
+      const id = todos.value[index].id;
+      try {
+        await axios.patch("http://localhost:3000/todos/" + id, {
+          completed: !todos.value[index].completed,
+        });
+      } catch (err) {
+        console.log(err);
+        errorMessage.value = "Something went wrong";
+      }
+      todos.value[index].completed = !todos.value[index].completed;
+    };
+
+    const searchText = ref("");
+
+    const filteredTodos = computed(() => {
+      if (searchText.value) {
+        return todos.value.filter((todo) => {
+          //우리가 검색한 값이 포함이 되면 return
+          return todo.subject.includes(searchText.value);
+        });
+      }
+      return todos.value;
     });
 
-
-    return {//template 안에서 접근 가능하게 함
+    return {
+      //template 안에서 접근 가능하게 함
       addTodo,
       todos,
       todoStyle,
@@ -129,15 +173,18 @@ export default {
       toggleTodoMain,
       searchText,
       filteredTodos,
-      errorMessage
+      errorMessage,
+      numberOfPages,
+      currentPage,
+      getTodos,
     };
-  }
-}
+  },
+};
 </script>
 
 <style>
-  .todo {
-    color: gray;
-    text-decoration: line-through;
-  }
+.todo {
+  color: gray;
+  text-decoration: line-through;
+}
 </style>
