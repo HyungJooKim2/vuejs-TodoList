@@ -7,22 +7,25 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
   <div class="container">
     <!--왼쪽 오른쪽 여백을 준다.-->
     <h2>To-do List</h2>
-    <!--template에선 .value를 해줄필요가 없다.-->
+    <!--template에선 .value를 해줄필요가 없다.
+        keyup.enter = enter시 searchTodo 메소드 실행
+    -->
     <input
       class="form-control"
       type="text"
       v-model="searchText"
       placeholder="Search"
+      @keyup.enter="searchTodo" 
     />
 
     <hr />
     <TodoSimpleForm @add-todo="addTodo" />
     <div style="color: red">{{ errorMessage }}</div>
 
-    <div v-if="!filteredTodos.length">There is nothing to display</div>
+    <div v-if="!todos.length">There is nothing to display</div>
     <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
     <TodoList
-      :todos="filteredTodos"
+      :todos="todos"
       @toggle-todo="toggleTodoMain"
       @delete-todo="deleteTodoMain"
     />
@@ -70,7 +73,7 @@ method는 인자로 값을 받아와서 함수 안에서 사용 가능
 computed는 함수안에 들어있는 reactive status가 있을때만 값을 가져와서 다룰 수 있으며 
 값을 저장함 (2번 출력해도 1번만 출력됨)
 */
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import TodoSimpleForm from "./components/TodoSimpleForm.vue";
 import TodoList from "./components/TodoList.vue";
 import axios from "axios";
@@ -81,13 +84,40 @@ export default {
   },
 
   setup() {
+    /*
+    안에 값이 바뀔때 마다 실행된다.(live data)
+    searchText가 변경이 되면 getTodos가 해당 searchText로 다시 실행
+    1(첫페이지) 에 get시켜줌  
+    prev : 이전 값
+    */
+    const searchText = ref("");
+
+   /*
+   searchText가 2초 안에 바뀔때 마다 
+   clearTimeout을 통해 취소가 됨 
+   마지막으로 타입한 텍스트만 getTodos로 요청
+   */
+    let timeout = null;   
+    const searchTodo = () =>{
+      clearTimeout(timeout);
+      getTodos(1);
+    };
+
+    watch(searchText, () => { 
+      clearTimeout(timeout); 
+      timeout = setTimeout(()=>{
+      getTodos(1);  
+      }, 2000)  //2초로 time-delay 설정 
+    });
+
     const deleteTodoMain = async (index) => {
       errorMessage.value = "";
 
       const id = todos.value[index].id;
       try {
         await axios.delete("http://localhost:3000/todos/" + id);
-        todos.value.splice(index, 1);
+        getTodos(1);
+        //todos.value.splice(index, 1);
       } catch (err) {
         console.log(err);
         errorMessage.value = "Something went wrong";
@@ -110,7 +140,7 @@ export default {
       currentPage.value = page;
       try {
         const res = await axios.get(
-          `http://localhost:3000/todos?_page=${page}&_limit=${limit}`
+          `http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`
         );
         numberOfTodos.value = res.headers["x-total-count"];
         todos.value = res.data;
@@ -127,11 +157,12 @@ export default {
       */
       errorMessage.value = "";
       try {
-        const res = await axios.post("http://localhost:3000/todos", {
+          await axios.post("http://localhost:3000/todos", {
           subject: todo.subject,
           completed: todo.completed,
         });
-        todos.value.push(res.data);
+        getTodos(1);
+        //todos.value.push(res.data);
       } catch (err) {
         console.log(err);
         errorMessage.value = "Something went wrong.";
@@ -152,18 +183,6 @@ export default {
       todos.value[index].completed = !todos.value[index].completed;
     };
 
-    const searchText = ref("");
-
-    const filteredTodos = computed(() => {
-      if (searchText.value) {
-        return todos.value.filter((todo) => {
-          //우리가 검색한 값이 포함이 되면 return
-          return todo.subject.includes(searchText.value);
-        });
-      }
-      return todos.value;
-    });
-
     return {
       //template 안에서 접근 가능하게 함
       addTodo,
@@ -172,11 +191,11 @@ export default {
       deleteTodoMain,
       toggleTodoMain,
       searchText,
-      filteredTodos,
       errorMessage,
       numberOfPages,
       currentPage,
       getTodos,
+      searchTodo,
     };
   },
 };
