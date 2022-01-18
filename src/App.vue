@@ -10,8 +10,10 @@
         </li>
       </ul>
 </nav>
+<div class="container"> <!--공백 추가-->
+    <router-view/>
+</div>
 
-  <router-view/>
 </template> 
 
 <script>
