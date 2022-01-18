@@ -171,18 +171,19 @@ export default {
       }
     };
 
-    const toggleTodoMain = async (index) => {
+    const toggleTodoMain = async (index, checked) => {
+      console.log(checked)
       errorMessage.value = "";
       const id = todos.value[index].id;
       try {
         await axios.patch("http://localhost:3000/todos/" + id, {
-          completed: !todos.value[index].completed,
+          completed: checked
         });
       } catch (err) {
         console.log(err);
         errorMessage.value = "Something went wrong";
       }
-      todos.value[index].completed = !todos.value[index].completed;
+      todos.value[index].completed = checked
     };
 
     return {
