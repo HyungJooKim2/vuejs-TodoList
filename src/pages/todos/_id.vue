@@ -38,6 +38,11 @@
        @click="moveToTodoListPage"
        >Cancel</button>
     </form>
+    <Toast v-if="showToast"
+    :message="toastMessage"
+    :type="toastAlertType"
+    />
+    <div id="Tobby">hyungjoo</div>
 </template>
 
 <script>
@@ -45,21 +50,39 @@ import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ref, computed } from 'vue';
 import _ from 'lodash';
+import Toast from  '@/components/Toast.vue';
+import { useToast } from '@/composables/toast';
 
 export default {
+  components:{
+    Toast
+  },
   setup(){
     const route = useRoute();
     const router = useRouter();
     const todo = ref(null);
     const originalTodo = ref(null);
     const loading = ref(true);
+    
+    const {toastMessage,
+          toastAlertType,
+          showToast,
+          triggerToast} = useToast();
+
+
 
     const getTodo = async () => {
+      try{
       const res = await axios.get('http://localhost:3000/todos/' + route.params.id);
       
       todo.value = { ...res.data };
       originalTodo.value = { ...res.data };
       loading.value = false;
+      }catch(error){
+        console.log(error);
+        triggerToast('Something went wrong','danger');
+      }
+
     };
 
     const todoUpdated = computed(()=>{
@@ -77,11 +100,17 @@ export default {
     }
 
     const onSave = async () => {
-      const res = await axios.put('http://localhost:3000/todos/'+ route.params.id,{
+      try{
+    const res = await axios.put('http://localhost:3000/todos/'+ route.params.id,{
       subject: todo.value.subject,
       completed: todo.value.completed 
       });
       originalTodo.value = {...res.data};
+      triggerToast('Successfully saved!');
+      }catch(error){
+        console.log(error);
+        triggerToast('Something went wrong','danger');
+      }
     }
 
     getTodo();
@@ -92,6 +121,9 @@ export default {
       moveToTodoListPage,
       onSave,
       todoUpdated,
+      showToast,
+      toastMessage,
+      toastAlertType
     };
   }
 }

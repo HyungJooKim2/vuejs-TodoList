@@ -4,9 +4,6 @@ v-on: == @
 v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비용이 많이 든다. 
  -->
 <template>
-<router-view/>
-  <div class="container">
-    <!--왼쪽 오른쪽 여백을 준다.-->
     <h2>To-do List</h2>
     <!--template에선 .value를 해줄필요가 없다.
         keyup.enter = enter시 searchTodo 메소드 실행
@@ -64,7 +61,10 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
         </li>
       </ul>
     </nav>
-  </div>
+    <Toast v-if="showToast"
+    :message="toastMessage"
+    :type="toastAlertType"
+    />
 </template>
 
 <script>
@@ -79,13 +79,23 @@ import { ref, computed, watch } from "vue";
 import TodoSimpleForm from "@/components/TodoSimpleForm.vue";
 import TodoList from "@/components/TodoList.vue";
 import axios from "axios";
+import Toast from  '@/components/Toast.vue';
+import { useToast } from '@/composables/toast';
+
 export default {
   components: {
     TodoSimpleForm, //component 등록
     TodoList,
+    Toast,
   },
 
   setup() {
+   
+    const {toastMessage,
+          toastAlertType,
+          showToast,
+          triggerToast} = useToast();
+
     /*
     안에 값이 바뀔때 마다 실행된다.(live data)
     searchText가 변경이 되면 getTodos가 해당 searchText로 다시 실행
@@ -122,7 +132,8 @@ export default {
         //todos.value.splice(index, 1);
       } catch (err) {
         console.log(err);
-        errorMessage.value = "Something went wrong";
+        //errorMessage.value = "Something went wrong";
+        triggerToast('Something went wrong','danger')
       }
     };
     const numberOfTodos = ref(0);
@@ -147,7 +158,8 @@ export default {
         numberOfTodos.value = res.headers["x-total-count"];
         todos.value = res.data;
       } catch (err) {
-        console.log(err);
+        //errorMessage.value = 'Something went wrong';
+        triggerToast('Something went wrong','danger')
       }
     };
     getTodos();
@@ -167,7 +179,8 @@ export default {
         //todos.value.push(res.data);
       } catch (err) {
         console.log(err);
-        errorMessage.value = "Something went wrong.";
+        //errorMessage.value = "Something went wrong.";
+        triggerToast('Something went wrong','danger')
       }
     };
 
@@ -181,10 +194,12 @@ export default {
         });
       } catch (err) {
         console.log(err);
-        errorMessage.value = "Something went wrong";
+        //errorMessage.value = "Something went wrong";
+        triggerToast('Something went wrong','danger')
       }
       todos.value[index].completed = checked
     };
+
 
     return {
       //template 안에서 접근 가능하게 함
@@ -199,6 +214,9 @@ export default {
       currentPage,
       getTodos,
       searchTodo,
+      toastMessage,
+      toastAlertType,
+      showToast
     };
   },
 };
