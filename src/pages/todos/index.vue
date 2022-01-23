@@ -4,7 +4,15 @@ v-on: == @
 v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비용이 많이 든다. 
  -->
 <template>
-    <h2>To-do List</h2>
+   <div>
+     <div class ="d-flex justify-content-between mb-3">
+           <h2>To-do List</h2>
+           <button class="btn btn-primary"
+                    @click="moveToCreatePage"
+           >
+             Create Todo
+           </button>
+       </div>
     <!--template에선 .value를 해줄필요가 없다.
         keyup.enter = enter시 searchTodo 메소드 실행
     -->
@@ -17,8 +25,7 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
     />
 
     <hr />
-    <TodoSimpleForm @add-todo="addTodo" />
-    <div style="color: red">{{ errorMessage }}</div>
+
 
     <div v-if="!todos.length">There is nothing to display</div>
     <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
@@ -61,6 +68,7 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
         </li>
       </ul>
     </nav>
+    </div>
     <Toast v-if="showToast"
     :message="toastMessage"
     :type="toastAlertType"
@@ -76,21 +84,20 @@ computed는 함수안에 들어있는 reactive status가 있을때만 값을 가
 @ -> src 폴더
 */
 import { ref, computed, watch } from "vue";
-import TodoSimpleForm from "@/components/TodoSimpleForm.vue";
 import TodoList from "@/components/TodoList.vue";
 import axios from "axios";
 import Toast from  '@/components/Toast.vue';
 import { useToast } from '@/composables/toast';
+import { useRouter } from 'vue-router';
 
 export default {
-  components: {
-    TodoSimpleForm, //component 등록
+  components: { //component 등록
     TodoList,
     Toast,
   },
 
   setup() {
-   
+    const router = useRouter();
     const {toastMessage,
           toastAlertType,
           showToast,
@@ -200,6 +207,12 @@ export default {
       todos.value[index].completed = checked
     };
 
+    const moveToCreatePage = () =>{
+     router.push({
+       name: 'TodoCreate',
+     })
+    };
+
 
     return {
       //template 안에서 접근 가능하게 함
@@ -216,10 +229,12 @@ export default {
       searchTodo,
       toastMessage,
       toastAlertType,
-      showToast
-    };
-  },
-};
+      showToast,
+      moveToCreatePage
+     };
+  }
+}
+
 </script>
 
 <style>
