@@ -6,68 +6,36 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
  -->
 <template>
   <div>
-    <div>
-      <div class="d-flex justify-content-between mb-3">
-        <h2>To-do List</h2>
-        <button class="btn btn-primary" @click="moveToCreatePage">
-          Create Todo
-        </button>
-      </div>
-      <!--template에선 .value를 해줄필요가 없다.
-        keyup.enter = enter시 searchTodo 메소드 실행
-    -->
-      <input
-        class="form-control"
-        type="text"
-        v-model="searchText"
-        placeholder="Search"
-        @keyup.enter="searchTodo"
-      />
-
-      <hr />
-
-      <div v-if="!todos.length">There is nothing to display</div>
-      <!--props로 자식 컴포넌트 에게 데이터를 보냄-->
-      <TodoList
-        :todos="todos"
-        @toggle-todo="toggleTodo"
-        @delete-todo="deleteTodoMain"
-      />
-      <!--active : 파란색 표시-->
-      <nav aria-label="Page navigation example">
-        <ul class="pagination">
-          <li v-if="currentPage !== 1" class="page-item">
-            <a
-              style="cursor: pointer"
-              class="page-link"
-              @click="getTodos(currentPage - 1)"
-              >Previous</a
-            >
-          </li>
-          <li
-            v-for="page in numberOfPages"
-            :key="page"
-            class="page-item"
-            :class="currentPage === page ? 'active' : ''"
-          >
-            <a
-              style="cursor: pointer"
-              class="page-link"
-              @click="getTodos(page)"
-              >{{ page }}</a
-            >
-          </li>
-          <li v-if="numberOfPages !== currentPage" class="page-item">
-            <a
-              style="cursor: pointer"
-              class="page-link"
-              @click="getTodos(currentPage + 1)"
-              >Next</a
-            >
-          </li>
-        </ul>
-      </nav>
+    <div class="d-flex justify-content-between mb-3">
+      <h2>To-Do List</h2>
+      <button class="btn btn-primary" @click="moveToCreatePage">
+        Create Todo
+      </button>
     </div>
+
+    <input
+      class="form-control"
+      type="text"
+      v-model="searchText"
+      placeholder="Search"
+      @keyup.enter="searchTodo"
+    />
+    <hr />
+
+    <div v-if="!todos.length">There is nothing to display</div>
+    <!--props로 받음-->
+    <TodoList
+      :todos="todos"
+      @toggle-todo="toggleTodo"
+      @delete-todo="deleteTodo"
+    />
+    <hr />
+    <Pagination
+      v-if="todos.length"
+      :numberOfPages="numberOfPages"
+      :currentPage="currentPage"
+      @click="getTodos"
+    />
   </div>
 </template>
 
@@ -84,11 +52,13 @@ import TodoList from "@/components/TodoList.vue";
 import axios from "@/axios";
 import { useToast } from "@/composables/toast";
 import { useRouter } from "vue-router";
+import Pagination from "@/components/Pagination.vue";
 
 export default {
   components: {
     //component 등록
     TodoList,
+    Pagination,
   },
 
   setup() {
