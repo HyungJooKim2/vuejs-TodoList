@@ -4,6 +4,7 @@ v-on: == @
 v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비용이 많이 든다. 
  -->
 <template>
+<div>
    <div>
      <div class ="d-flex justify-content-between mb-3">
            <h2>To-do List</h2>
@@ -73,6 +74,7 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
     :message="toastMessage"
     :type="toastAlertType"
     />
+    </div>
 </template>
 
 <script>
@@ -129,10 +131,9 @@ export default {
       }, 2000)  //2초로 time-delay 설정 
     });
 
-    const deleteTodoMain = async (index) => {
+    const deleteTodoMain = async (id) => {
       errorMessage.value = "";
 
-      const id = todos.value[index].id;
       try {
         await axios.delete("http://localhost:3000/todos/" + id);
         getTodos(1);

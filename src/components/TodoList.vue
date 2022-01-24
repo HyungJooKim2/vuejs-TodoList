@@ -23,18 +23,30 @@
         </span>
       </div>
       <div>                                   <!--이벤트 버블링이 되지 않고 멈춤 -->
-        <button class="btn btn-danger btn-sm" @click.stop ="deleteTodo(index)">
+        <button class="btn btn-danger btn-sm" @click.stop ="openModal(todo.id)">
           Delete
         </button>
       </div>
     </div>
   </div>
+  <teleport to="#modal">
+  <!--slot 활용 Title 지정-->
+  <DeleteModal
+    v-if="showModal"
+    @close="closeModal"
+    @delete="deleteTodo"
+  />
+  </teleport>
 </template>
 
 <script>
 import { useRouter } from 'vue-router'
-
+import DeleteModal from '@/components/DeleteModal.vue';
+import { ref } from 'vue';
 export default {
+  components: {
+    DeleteModal
+  },
   props: {
     todos: {
       type: Array,
@@ -47,14 +59,29 @@ export default {
   setup(props, { emit }) {
 
     const router = useRouter();
+    const showModal = ref(false);
+    const todoDeleteId = ref(null);
 
     //부모 컴포넌트에 index값 전달
     const toggleTodo = (index, event) => { 
       emit("toggle-todo", index, event.target.checked);
     };
+
+    const openModal = (id) => {
+      todoDeleteId.value=id;
+      showModal.value=true;
+    };
+
+      const closeModal = () => {
+      todoDeleteId.value=null;
+      showModal.value=false;
+    };
   
-    const deleteTodo = (index) => {
-      emit("delete-todo", index);
+    const deleteTodo = () => {
+      emit("delete-todo", todoDeleteId.value);
+
+      showModal.value = false;
+      todoDeleteId.value = null;
     };
 
     const moveToPage = (todoId) => {
@@ -72,6 +99,9 @@ export default {
       toggleTodo,
       deleteTodo,
       moveToPage,
+      showModal,
+      openModal,
+      closeModal
     };
   },
 };
