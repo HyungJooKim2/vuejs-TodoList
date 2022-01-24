@@ -68,7 +68,6 @@ v-show 는 랜더링 할때 비용이 많이 들고, v-if 는 토글 할때 비�
         </ul>
       </nav>
     </div>
-    <Toast v-if="showToast" :message="toastMessage" :type="toastAlertType" />
   </div>
 </template>
 
@@ -83,7 +82,6 @@ computed는 함수안에 들어있는 reactive status가 있을때만 값을 가
 import { ref, computed, watch } from "vue";
 import TodoList from "@/components/TodoList.vue";
 import axios from "@/axios";
-import Toast from "@/components/Toast.vue";
 import { useToast } from "@/composables/toast";
 import { useRouter } from "vue-router";
 
@@ -91,7 +89,6 @@ export default {
   components: {
     //component 등록
     TodoList,
-    Toast,
   },
 
   setup() {

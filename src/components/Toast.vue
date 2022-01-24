@@ -1,3 +1,4 @@
+
 <template>
   <div class="alert toast-box" :class="`alert-${type}`" role="alert">
     {{ message }}
