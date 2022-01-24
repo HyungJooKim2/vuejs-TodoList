@@ -55,40 +55,10 @@
       "id": 9
     },
     {
-      "subject": "ㄹㅁㄹㅁㄹㅁㄹㅁㄴㄹㅁ",
+      "subject": "ㄹㅁㄹㅁㄹㅁㄹㅁㄴㄹㅁdada",
       "completed": false,
-      "body": "ㄹㅁㄹㅁㄴㄹㅁ",
+      "body": "dadadada",
       "id": 10
-    },
-    {
-      "subject": "ㅁㄹㅁㄴㄹㅁㄹㅁㄹ",
-      "completed": false,
-      "body": "ㅁㄹㅁㄴㄹㄴㅁㄹ",
-      "id": 11
-    },
-    {
-      "subject": "sfafasdf",
-      "completed": false,
-      "body": "sfs",
-      "id": 12
-    },
-    {
-      "subject": "afsadfsafs",
-      "completed": false,
-      "body": "afsafsf",
-      "id": 13
-    },
-    {
-      "subject": "asdfasf",
-      "completed": false,
-      "body": "safaf",
-      "id": 14
-    },
-    {
-      "subject": "fsfs",
-      "completed": false,
-      "body": "sfs",
-      "id": 15
     }
   ]
 }
