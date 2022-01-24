@@ -1,9 +1,6 @@
 <template>
-  <div
-  class= "alert toast-box" 
-  :class="`alert-${type}`"
-  role="alert">
-  {{ message }}
+  <div class="alert toast-box" :class="`alert-${type}`" role="alert">
+    {{ message }}
   </div>
 </template>
 
@@ -11,21 +8,21 @@
 export default {
   props: {
     message: {
-      type: String, 
-      required: true
-    },
-    type:{
       type: String,
-      default: 'success'
-    }
-  }
-}
+      required: true,
+    },
+    type: {
+      type: String,
+      default: "success",
+    },
+  },
+};
 </script>
 
 <style>
-    .toast-box {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-    }
+.toast-box {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+}
 </style>

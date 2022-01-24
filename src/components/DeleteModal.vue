@@ -1,43 +1,41 @@
 <template>
   <Modal>
-    <template v-slot:title>
-      Delete Todo
-    </template>
-    <template v-slot:body>
-        정말로 삭제하시겠습니까?
-    </template>
-    <template v-slot:footer>
-        <button type="button" class="btn btn-secondary" @click="onClose">Close</button>
-        <button type="button" class="btn btn-danger" @click="onDelete">Delete</button>
+    <template #title> Delete Todo </template>
+    <template #body> 정말로 삭제하시겠습니까? </template>
+    <template #footer>
+      <button type="button" class="btn btn-secondary" @click="onClose">
+        Close
+      </button>
+      <button type="button" class="btn btn-danger" @click="onDelete">
+        Delete
+      </button>
     </template>
   </Modal>
 </template>
 
 <script>
-import Modal from '@/components/Modal.vue';
+import Modal from "@/components/Modal.vue";
 export default {
-   components:{
-        Modal
-    },
+  components: {
+    Modal,
+  },
 
-    setup(props, { emit }){
-        const onDelete = () =>{
-        emit('delete');
-        }
+  setup(props, { emit }) {
+    const onDelete = () => {
+      emit("delete");
+    };
 
-        const onClose = () =>{
-        emit('close');
-        }
+    const onClose = () => {
+      emit("close");
+    };
 
-        return{
-            onDelete,
-            onClose
-        }
-    }
-
-}
+    return {
+      onDelete,
+      onClose,
+    };
+  },
+};
 </script>
 
 <style>
-
 </style>
